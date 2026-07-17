@@ -92,7 +92,7 @@ export function Header({ locale = "en" }: { locale?: Locale }) {
 
       <div
         className={cn(
-          "fixed inset-0 top-[var(--header-h)] bg-white/90 backdrop-blur-2xl transition-opacity duration-300 lg:hidden",
+          "fixed inset-0 top-[var(--header-h)] overflow-y-auto bg-[#eef6f0] transition-opacity duration-300 lg:hidden",
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
       >

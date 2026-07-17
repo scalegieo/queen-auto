@@ -90,39 +90,36 @@ export function Header({ locale = "en" }: { locale?: Locale }) {
         </div>
       </div>
 
-      <div
-        className={cn(
-          "fixed inset-0 top-[var(--header-h)] overflow-y-auto bg-[#eef6f0] transition-opacity duration-300 lg:hidden",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        )}
-      >
-        <nav className="flex flex-col gap-1 px-6 py-8">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="border-b border-border py-4 font-display text-2xl font-semibold tracking-tight"
+      {open ? (
+        <div className="fixed inset-0 top-[var(--header-h)] z-40 overflow-y-auto bg-[#eef6f0] lg:hidden">
+          <nav className="flex flex-col gap-1 px-6 py-8">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="border-b border-border py-4 font-display text-2xl font-semibold tracking-tight"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <a
+              href={telHref(locale === "es" ? dealership.phoneEs : dealership.phone)}
+              className="mt-6 inline-flex items-center gap-2 text-lg text-green"
             >
-              {item.label}
+              <Phone className="h-5 w-5" />
+              {locale === "es" ? dealership.phoneEsDisplay : dealership.phoneDisplay}
+            </a>
+            <Link
+              href={localizedHref(locale, "/financing")}
+              onClick={() => setOpen(false)}
+              className="btn-primary mt-6 w-full"
+            >
+              {t.nav.preApprove}
             </Link>
-          ))}
-          <a
-            href={telHref(locale === "es" ? dealership.phoneEs : dealership.phone)}
-            className="mt-6 inline-flex items-center gap-2 text-lg text-green"
-          >
-            <Phone className="h-5 w-5" />
-            {locale === "es" ? dealership.phoneEsDisplay : dealership.phoneDisplay}
-          </a>
-          <Link
-            href={localizedHref(locale, "/financing")}
-            onClick={() => setOpen(false)}
-            className="btn-primary mt-6 w-full"
-          >
-            {t.nav.preApprove}
-          </Link>
-        </nav>
-      </div>
+          </nav>
+        </div>
+      ) : null}
     </header>
   );
 }

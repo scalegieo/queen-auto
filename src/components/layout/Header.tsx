@@ -7,7 +7,6 @@ import { Menu, Phone, X } from "lucide-react";
 import { dealership, telHref } from "@/lib/dealership";
 import { getDictionary, localizedHref, type Locale } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
-import { cn } from "@/lib/format";
 
 export function Header({ locale = "en" }: { locale?: Locale }) {
   const [open, setOpen] = useState(false);

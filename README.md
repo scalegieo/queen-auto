@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Queen Auto Sales
 
-## Getting Started
+Premium, ultra-modern dealership website for [Queen Auto Sales](https://www.queenautosales.com) (Denver, CO) — dark luxury design, high-conversion layouts, and Frazer DMS inventory integration.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + TypeScript
+- **Tailwind CSS 4**
+- **Frazer DMS API** (env-secured key) with mock inventory fallback
+- Daily inventory sync via Vercel Cron (`/api/cron/sync-inventory`)
+
+## Quick start
 
 ```bash
+cp .env.example .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Frazer API setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Copy `.env.example` → `.env.local`
+2. Set your key:
 
-## Learn More
+```env
+FRAZER_API_KEY=your_secure_api_key_here
+FRAZER_API_URL=https://your-frazer-partner-api.example.com/v1
+FRAZER_DEALER_ID=optional_dealer_id
+CRON_SECRET=long_random_string
+```
 
-To learn more about Next.js, take a look at the following resources:
+3. The client calls `GET {FRAZER_API_URL}/vehicles` with:
+   - `Authorization: Bearer {FRAZER_API_KEY}`
+   - `X-API-Key: {FRAZER_API_KEY}`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Responses are mapped to:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Site field   | Common Frazer / partner fields      |
+|-------------|--------------------------------------|
+| Title       | year + make + model + trim           |
+| Price       | `price`, `asking_price`              |
+| Mileage     | `mileage`, `odometer`                |
+| VIN         | `vin`                                |
+| Images      | `images`, `photos`, `photo_urls`     |
+| Description | `description`, `comments`            |
+| Features    | `features`, `options`                |
 
-## Deploy on Vercel
+5. Dynamic routes: `/inventory/[slug]`
+6. Missing photos fall back to `/images/vehicle-fallback.svg`
+7. Daily sync: Vercel Cron at 06:00 UTC (see `vercel.json`). Protect with `CRON_SECRET`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> **Note:** Frazer’s native dealer feed is typically FTP/CSV to partners. This project expects a REST inventory endpoint (partner API or middleware such as Supergood). Until `FRAZER_API_KEY` is set, curated demo inventory is shown.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pages
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Cinematic hero, featured inventory, trust, financing CTA |
+| `/inventory` | Filters, sort, pagination |
+| `/inventory/[slug]` | Detail page with sticky CTAs, Carfax, financing & trade-in |
+| `/financing` | Pre-approval form + trust badges |
+| `/trade-in` | Appraisal request form |
+| `/about` | Story, why choose us, reviews |
+| `/contact` | Click-to-call, map, hours, form |
+
+## SEO
+
+- Meta titles oriented around **Denver Used Cars**
+- Vehicle & AutoDealer JSON-LD schema
+- `sitemap.xml` + `robots.txt`
+- Image optimization (AVIF/WebP) + lazy loading
+
+## Lead capture
+
+`POST /api/leads` logs submissions. Connect this route to your CRM, email, or Frazer customer create endpoint for production.
+
+## Deploy
+
+Deploy to Vercel (CDN + Cron). Add env vars in the project settings. Never commit `.env.local`.
